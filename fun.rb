@@ -13,11 +13,11 @@ module Skytap
 	autoload :VM, 'skytap/vm'
 end
 
-v = Skytap::VM.find(4685072, configuration_id: 3442128)
+# v = Skytap::VM.find(4685072, configuration_id: 3442128)
 
-v.name = 'THE NAME CHANGE GOES HERE 5'
+# v.name = 'THE NAME CHANGE GOES HERE 6'
 
-v.save
+# v.save
 
 # puts "what are the odds???"
 # #c = v.configuration
@@ -38,8 +38,8 @@ v.save
 # e.g.  perform :create, via: :put, to: "/confiurations/:configuration_id"
 #... or just implement new save method in subclasses?
 
-# v2 = Skytap::VM.new(configuration_id: 3442128, template_id: 531869)
+v2 = Skytap::VM.new(configuration_id: 3442128, template_id: 531869)
 
-# v2.save
+v2.save
 
-# puts "***" + v2.id
+puts "***" + v2.id
