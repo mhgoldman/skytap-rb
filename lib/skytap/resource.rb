@@ -126,13 +126,13 @@ module Skytap
 		end
 
 		def save_new_record
-			@api_properties = post(
+			@api_properties = self.class.post(
+				self.class.collection_url_format.required_args(properties),
 				self.class.collection_url_format.unneeded_args(properties)
 			)
 		end
 
 		def save_dirty_record
-			#API.put(@url, dirty_properties)
 			put(dirty_properties)
 		end
 
@@ -168,7 +168,6 @@ module Skytap
 		end
 
 		def method_missing(method_sym, *arguments, &block)
-			#TODO This should also access custom properties
 			if @api_properties.respond_to?(method_sym)
 				if (method_sym.to_s.end_with?('='))
 					property_name = method_sym.to_s.chomp('=').to_sym

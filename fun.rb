@@ -28,8 +28,14 @@ end
 
 # puts c.vms
 
-v2 = Skytap::VM.new(configuration_id: 3442128, template_id: 531869)
+# Adding a single-VM template to a config. (Note: this will do something weird if there were multiple VMs in the template...)
+# v2 = Skytap::VM.new(configuration_id: 3442128, template_id: 531869)
+# v2.save
 
-v2.save
+# puts "***" + v2.id
 
-puts "***" + v2.id
+c = Skytap::Configuration.new(template_id: 531869)
+c.save
+puts c.id
+c.runstate = 'running'
+c.save

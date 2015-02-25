@@ -3,6 +3,7 @@ require 'recursive_open_struct'
 module Skytap
 	class URLFormat
 		def initialize(url_format_str)
+			puts url_format_str
 			@url_format_str = url_format_str
 		end
 
@@ -11,6 +12,7 @@ module Skytap
 		end
 
 		def argify(url_args)
+			url_args ||= {}
 			url_args = url_args.to_h if url_args.is_a?(RecursiveOpenStruct)
     	provided_arg_names = url_args.keys.map {|key| key.to_sym}
     	missing = missing_arg_names(provided_arg_names)
@@ -25,16 +27,14 @@ module Skytap
     	@url_format_str.split('/').select {|token| token.start_with?(':')}.map {|token| token[1..-1].to_sym}.uniq
 		end
 
-		def required_args(args)
-			args.select {|k,v| required_arg_names.include?(k)}
-		end
+		#TODO -- These take in Openstructs and return hashes - that's weird
 
-		def unneeded_arg_names(arg_names)
-			arg_names - required_arg_names
+		def required_args(args)
+			args.to_h.select {|k,v| required_arg_names.include?(k)}
 		end
 
 		def unneeded_args(args)
-			args.reject {|k,v| required_arg_names.include?(k)} #TODO - DRY w/r/t required_args
+			args.to_h.reject {|k,v| required_arg_names.include?(k)}
 		end
 
 		def missing_arg_names(arg_names)
