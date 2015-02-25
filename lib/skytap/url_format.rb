@@ -3,7 +3,6 @@ require 'recursive_open_struct'
 module Skytap
 	class URLFormat
 		def initialize(url_format_str)
-			puts url_format_str
 			@url_format_str = url_format_str
 		end
 

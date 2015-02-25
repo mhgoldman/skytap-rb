@@ -30,18 +30,16 @@ module Skytap
 		def self.has_many(resource_name_plural, opts={})
 			resource_class = "Skytap::#{(opts[:class_name] || resource_name_plural.to_s.singularize).to_s.classify}".constantize
 			define_method(resource_name_plural) do
-				puts properties.send(resource_name_plural)
 				properties.send(resource_name_plural).map do |resource_info|
 					args = {id: resource_info.id, "#{self.class.resource_name}_id".to_sym => self.id}
-					puts "The args are #{args}"
 					resource_url = resource_class.object_url_format.argify(args)
 					resource_class.new(resource_url)
 				end
 			end
 		end
 
-		def self.custom_property(name, args)
-			define_method(name, args[:calculated_with])
+		def self.custom_property(name, &block)
+			define_method(name, block)
 
 			@custom_property_names ||= []
 			@custom_property_names << name
@@ -91,7 +89,7 @@ module Skytap
 			)
 		end
 
-		def initialize(args)
+		def initialize(args={})
 			if args.is_a?(String) #URL
 				@api_properties = API.get(args)
 				not_new_record!
@@ -108,7 +106,7 @@ module Skytap
 		end
 
 		def url
-			self.class.object_url_format.argify(properties)
+			@api_properties.url ? URI(@api_properties.url).path : self.class.object_url_format.argify(properties)
 		end
 
 		def collection_url
@@ -168,17 +166,13 @@ module Skytap
 		end
 
 		def method_missing(method_sym, *arguments, &block)
-			if @api_properties.respond_to?(method_sym)
-				if (method_sym.to_s.end_with?('='))
-					property_name = method_sym.to_s.chomp('=').to_sym
-
-					if @api_properties[property_name] != arguments.first
-						dirty!(property_name)
-					else
-						return
-					end
+			if (method_sym.to_s.end_with?('='))
+				property_name = method_sym.to_s.chomp('=').to_sym
+				if @api_properties[property_name] != arguments.first
+					@api_properties[property_name] = arguments.first
+					dirty!(property_name)
 				end
-
+			elsif @api_properties.respond_to?(method_sym)
 				@api_properties.send(method_sym, *arguments, &block)
 			else
 				raise NoMethodError.new(method_sym.to_s)
