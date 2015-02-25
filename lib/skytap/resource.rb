@@ -41,26 +41,18 @@ module Skytap
 		end
 
 		def self.custom_property(name, args)
-			@custom_property_lambdas ||= {}
-			@custom_property_lambdas[name] = args[:calculated_with]
+			define_method(name, args[:calculated_with])
 
-			define_method(name, @custom_property_lambdas[name])
-#				@custom_property_lambdas[name].call(self) #args won't be in scope when this method is actually called - need to somehow copy the lambda in here
-#			end
-
-			#TODO: This is redundant. Should store the method name rather than the lambda and use .send rather than .call.
+			@custom_property_names ||= []
+			@custom_property_names << name
 		end
 
-		def self.custom_property_lambdas
-			@custom_property_lambdas
+		def self.custom_property_names
+			@custom_property_names
 		end
 
 		def custom_properties
-			self.class.custom_property_lambdas ? self.class.custom_property_lambdas.map {|k,v| [k, v.call(self)]}.to_h : {}
-		end
-
-		def api_properties
-			@api_properties
+			self.class.custom_property_names ? self.class.custom_property_names.map {|name| [name, self.send(name)]}.to_h : {}
 		end
 
 		def self.get(url_args={})
@@ -94,7 +86,7 @@ module Skytap
 
 		def properties
 			RecursiveOpenStruct.new(
-				api_properties.to_h.merge(custom_properties),
+				@api_properties.to_h.merge(custom_properties),
 				recurse_over_arrays: true
 			)
 		end
@@ -189,8 +181,6 @@ module Skytap
 				end
 
 				@api_properties.send(method_sym, *arguments, &block)
-			elsif self.class.custom_property_lambdas.keys.include?(method_sym)
-				self.class.custom_property_lambdas[method_sym].call(self)
 			else
 				raise NoMethodError.new(method_sym.to_s)
 			end

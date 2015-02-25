@@ -2,9 +2,9 @@ module Skytap
 	class VM < Resource
 		collection_url_formatted_as "/configurations/:configuration_id/vms"
 		belongs_to :configuration
-		custom_property :configuration_id, {calculated_with: lambda do |context|
-			context.api_properties[:configuration_id] || context.api_properties[:configuration_url].split('/').last
-		end}
+		custom_property :configuration_id, { calculated_with: lambda do
+			@api_properties.configuration_id || @api_properties.configuration_url.split('/').last
+		end }
 
 		def save_new_record
 			config = self.configuration
